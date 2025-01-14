@@ -283,6 +283,7 @@ contract AlienListrack is ReentrancyGuard {
 
         if (success) {
             transactions[_txId].isSettled = true;
+            transactions[_txId].isRefunded = true;
             emit AlienSettled(_txId,transactions[_txId].slotNumber,
                                 transactions[_txId].txIndex);
         }
@@ -302,7 +303,7 @@ contract AlienListrack is ReentrancyGuard {
         require (transactions[_txId].hashedSecret!=bytes32(0),
         "This is not a HTLC transaction eligible for refund");
 
-        require(!transactions[_txId].isRefunded, "Funds already refunded");
+        require(!transactions[_txId].isRefunded, "Funds already have been refunded");
 
         require(!transactions[_txId].isSettled, "Trade already settled");
 

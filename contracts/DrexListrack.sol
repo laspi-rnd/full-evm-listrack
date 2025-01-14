@@ -534,6 +534,7 @@ pragma solidity ^0.8.24;
 
         if (success) {
         trades[_txId].statusChain.settled = true; // Mark the trade as settled
+        trades[_txId].statusChain.locked = false; // There are no more locked assets in Listrack
             if (trade.hashedSecret!=bytes32(0)) {
                     emit manualSecretTradeSettled (_txId,_secretRevealed);
             } else  emit manualTradeSettled (_txId);
@@ -584,6 +585,7 @@ pragma solidity ^0.8.24;
 
         if (_success) {
         trades[_transactions[i]].statusChain.settled = true; // Mark the trade as settled
+        trades[_transactions[i]].statusChain.locked = false; // There are no more locked assets in Listrack
          emit automaticTradeSettled(_transactions[i]);
 
          // the below statemente assumes that the Merkle Contract is being capable
