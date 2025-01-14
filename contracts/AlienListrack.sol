@@ -149,11 +149,9 @@ contract AlienListrack is ReentrancyGuard {
         // the user inputs its transaction index above and the vector of Pending Transactions below
         // _startPendingDrexId : first id Pending Transaction
         uint256 _drexAlienConfirmationIndex
-
-        // below input is the block number of the confirmation index
-        // used for computing syncronization between Drex and Alien Chain
         
-    ) external payable nonReentrant returns (bool) {
+    ) external payable nonReentrant //returns (bool) 
+    {
         bool success=false;
         require((_alienAmount > 0), "Invalid ETH amount");
         require((_mikeAlienAddress != address(0)),"No Mike Address");
@@ -257,7 +255,7 @@ contract AlienListrack is ReentrancyGuard {
             }  
         }
         console.log ("Alien Leg Written ?",success); 
-        return success;  
+        //return success;  
     }
 
     function mikeSettleTrade(bytes32 _txId, bytes32 _secretRevealed 
@@ -353,6 +351,7 @@ contract AlienListrack is ReentrancyGuard {
         uint256 _ellapsedTime = block.timestamp - slotProduction.lastTimeStamp;
         console.log (">> Ellapsed Time: ", _ellapsedTime);
         console.log (">> Current Slot: ", slotProduction.currentSlot);  
+        console.log (">> Time Slot Confirmation: ", timeSlotConfirmation);
         if (_ellapsedTime>=timeSlotConfirmation) {
         console.log (">> Creating new time slot");
         // for each new slot produced the head of the slot is written
