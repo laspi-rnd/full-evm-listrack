@@ -270,7 +270,7 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
 
     merkleContract.connect(oliver);
     
-    // for (i=0; i<=10 ; i++) { it cannot be used for reentrancy because each iteration creates a new block
+    // for (i=0; i<=10 ; i++) { // it cannot be used for reentrancy because each iteration creates a new block
     expect (await merkleContract.connect(oliver) // oliver is a merkle signer
                        .validateSomeTxForSettlement(TxIdToSettle,    // txIds
                                                     TxIndexToSettle, // index
@@ -278,11 +278,10 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
                                                     slotArray, // slot number
                                                     Listrack.target)) // 
                         .to.emit(Listrack,"automaticTradeSettled");
-                     //  }
+                      // }
     
     console.log ("** Cross-chain tranfers completed **");
     console.log ("** Cross-chain tranfers completed **");
-  
   });
 
 

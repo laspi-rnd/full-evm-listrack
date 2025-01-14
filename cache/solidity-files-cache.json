@@ -460,8 +460,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexListrack.sol": {
-      "lastModificationDate": 1736894015895,
-      "contentHash": "b78732eade8f677b4c5178546f294a6b",
+      "lastModificationDate": 1736895418184,
+      "contentHash": "84dd499ae26974ff8118217a911b09e2",
       "sourceName": "contracts/DrexListrack.sol",
       "solcConfig": {
         "version": "0.8.24",
