@@ -248,9 +248,12 @@ pragma solidity ^0.8.24;
         return (_success,_returnedValue);
      }
 
+    // the below function does not require Merkle Proof because all transactions are listed
+    // Drex Listrack only settles the transactions that this Merkle Contract is responsible
+    // Drex Listrack does not settle transactions that the current Merkle Contract is not in charge
      function validateAllTxForSettlementForOneAlienBlock (uint256 _alienBlock,
                                         bytes32[] memory _transactions,
-                                        address _drexListrack) external onlyOwner {
+                                        address _drexListrack) external onlyOwner nonReentrant {
         require (verifiedTxbyBlock[_alienBlock].length==0,
         "Transactions already validated for this alien block");
         bytes32 _hash = genMerkleTree (_transactions);
@@ -262,7 +265,7 @@ pragma solidity ^0.8.24;
 
      function validateSomeTxForSettlement (bytes32[] memory _txId, uint256[] memory _txIndex, 
                                         bytes32[][] memory _merkleProof, uint256[] memory _alienBlock, 
-                                        address _drexListrack) external onlyOwner {
+                                        address _drexListrack) external onlyOwner nonReentrant {
         //require (verifiedTxbyBlock[_alienBlock].length==0,
         //"Transactions already validated for this alien block");
        // bytes32[] memory _txSend = new bytes32[](1);

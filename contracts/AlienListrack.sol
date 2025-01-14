@@ -351,7 +351,7 @@ contract AlienListrack is ReentrancyGuard {
         uint256 _ellapsedTime = block.timestamp - slotProduction.lastTimeStamp;
         console.log (">> Ellapsed Time: ", _ellapsedTime);
         console.log (">> Current Slot: ", slotProduction.currentSlot);  
-        console.log (">> Time Slot Confirmation: ", timeSlotConfirmation);
+        //console.log (">> Time Slot Confirmation: ", timeSlotConfirmation);
         if (_ellapsedTime>=timeSlotConfirmation) {
         console.log (">> Creating new time slot");
         // for each new slot produced the head of the slot is written

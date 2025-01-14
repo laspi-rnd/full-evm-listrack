@@ -211,7 +211,7 @@ abstract contract ERC20 is Context, IERC20, IERC20Metadata, IERC20Errors {
         //console.log("Transfer from ", from);
         //console.log("Transfer to ", to);
         //console.log("Transfer value ", value);
-        console.log("* Transfer completed *");
+        console.log("* Transfer completed* ",value);
         emit Transfer(from, to, value);
     }
 

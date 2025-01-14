@@ -555,6 +555,7 @@ pragma solidity ^0.8.24;
         // bool[] memory success = new bool[](_transactions.length);
 
         for (uint256 i=0; i< _transactions.length ; i++) {
+            
         // success[i] = false;
         bool _success = false;
          // it verifies whether the sending contract to this function

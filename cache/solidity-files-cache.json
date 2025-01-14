@@ -2,8 +2,8 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/henrique/listrack/contracts/AlienListrack.sol": {
-      "lastModificationDate": 1736815749769,
-      "contentHash": "9088153d37a40b6a4045a0e82eab5f19",
+      "lastModificationDate": 1736855527359,
+      "contentHash": "dbea5e1f03fb4a03cf1b27b43666ea6a",
       "sourceName": "contracts/AlienListrack.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -151,8 +151,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/tokens/ERC20.sol": {
-      "lastModificationDate": 1736794109936,
-      "contentHash": "67badf36919de7d7cb33fcb3c72f86e5",
+      "lastModificationDate": 1736890744601,
+      "contentHash": "95c200fa12106e60b18ab890b1212dac",
       "sourceName": "contracts/tokens/ERC20.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -419,8 +419,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexMerkle.sol": {
-      "lastModificationDate": 1736794109937,
-      "contentHash": "7d8827c285b3c6481968faffcae3b727",
+      "lastModificationDate": 1736893509838,
+      "contentHash": "f098bbabc6fe1b9118eef7d50930d44e",
       "sourceName": "contracts/DrexMerkle.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -460,8 +460,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexListrack.sol": {
-      "lastModificationDate": 1736794109935,
-      "contentHash": "4144a8faa167f50f318128b7a12741d6",
+      "lastModificationDate": 1736894015895,
+      "contentHash": "b78732eade8f677b4c5178546f294a6b",
       "sourceName": "contracts/DrexListrack.sol",
       "solcConfig": {
         "version": "0.8.24",
