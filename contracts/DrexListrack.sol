@@ -508,6 +508,8 @@ pragma solidity ^0.8.24;
         function aliceSettleTrade(bytes32 _txId, uint256 _txIndex, bytes32[] memory _merkleProof, 
         uint256 _blockNumber, bytes32 _secretRevealed) public payable nonReentrant {
         //returns (bool) {
+        // Important : anyone can settle the Transaction informing the Merkle Proof! 
+        // Any msg.sender, not only Alice, can send Tx for settlement
          bool success = false;
         Trade memory trade = trades[_txId];
 
@@ -773,8 +775,7 @@ pragma solidity ^0.8.24;
         // and confirming transactions in Alien Chain through sending that indexId to
         // Alien Chain
         slotHeadTxIndex[slotProduction.currentSlot] = _indexId;
-
-      //  console.log ("New Slot Head Index : ", (slotHeadTxIndex[slotProduction.currentSlot]));
+        console.log ("New Slot Head Index : ", (slotHeadTxIndex[slotProduction.currentSlot]));
         //console.log ("New blockHead Tx Id : ");
         //console.logBytes32 (blockHead[block.number].TxId);
             // at least a minimum number of blocks must happen before emitting the event in the blockchain
@@ -782,14 +783,21 @@ pragma solidity ^0.8.24;
             // this is to avoid the first slots that are not yet to be expired
             // 1000 is the minimum slot to be considered in the slot chain
 
-       // console.log ("Antes Loop");
+        console.log ("Before Loop");
+        console.log ("LowerLimitSlot",lowerLimitSlotAlienConfirmation);
+        console.log ("Genesis Slot:", slotProduction.genesisSlot);
         
         // the below statement asserts that slots before the genesis slot are not considered
-        if    (lowerLimitSlotAlienConfirmation>=slotProduction.genesisSlot) {
+        if    (lowerLimitSlotAlienConfirmation>slotProduction.genesisSlot) {
 
-            while (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]==uint256(0)) {
-                lowerLimitSlotAlienConfirmation--;  
-              //  console.log ("Not leaving loop");
+            console.log ("Need to pass here for DrexTxIndex Alien Confirmation");
+
+            while (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]==
+                    slotProduction.lowerLimitDrexIndexAlienConfirmation) {
+            console.log ("Drex Index to update: ",slotHeadTxIndex[lowerLimitSlotAlienConfirmation]);
+            console.log ("Current Drex Index :", slotProduction.lowerLimitDrexIndexAlienConfirmation);
+                lowerLimitSlotAlienConfirmation++;  
+              console.log ("Not leaving loop");
               //  console.log ("Lower Limit Slot Alien Confirmation: ", lowerLimitSlotAlienConfirmation);
                 // it is required to find the oldest slot of transactions to expire
             }
