@@ -184,7 +184,10 @@ contract AlienListrack is ReentrancyGuard {
 
         console.log ("Entered Write Alien Leg");
         console.log ("Drex Index", _drexTxIndex);
-        console.log ("Drex Expiration Index must be lower than before", _drexAlienConfirmationIndex);
+        console.log ("Drex Index must be equal or higher than DrexConfirmation Index (voted) :"
+        , drexConfirmationIndex);
+        console.log ("Drex Index must be equal or higher than DrexAlien Index (informed by user) :"
+        , _drexAlienConfirmationIndex);
         //console.log ("Hashed Secret");
         //console.logBytes32 (_hashedSecret);
 

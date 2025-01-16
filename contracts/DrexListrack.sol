@@ -611,14 +611,19 @@ pragma solidity ^0.8.24;
     function mikeManualRevert (bytes32 _txId) external payable nonReentrant {
         bool success = false;
         
-        require(trades[_txId].mikeDrexAddress == msg.sender,
-         "Unauthorized - Only Mike can revert");
+      //  require(trades[_txId].mikeDrexAddress == msg.sender,
+      //   "Unauthorized - Only Mike can revert");
+      // anyone can revert the Mike Tx whether he has this right to receive
          
         require(!trades[_txId].statusChain.settled, 
         "Trade already settled");
 
         require(trades[_txId].statusChain.locked, 
         "Trade not locked yet to revert");
+
+        console.log ("Current Slot :",slotProduction.currentSlot);
+        console.log ("Tx Slot :", trades[_txId].statusChain.slotNumber);
+        console.log ("Listrack Expiration :", listrackExpiration);
 
         require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
                 >= listrackExpiration ,"Listrack transaction not expired yet");

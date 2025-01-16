@@ -119,6 +119,7 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
   // Mike sends Tx in Drex
   // Number of Txs vary on the amount sent
   for (let i = 0; i < drexSigners.length-1; i++) {
+      // wait time for increasing transaction is below
       await time.increase(2*timeSlotDrex); // one time slot for each signer
       for (let j=10000000000000; j<=100000000000000 ; j+=10000000000000) {  
       expect (await Listrack.connect(drexSigners[i+1]).setTrade(
@@ -176,6 +177,8 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     // console.log (tradesToPushAlien);
      // the below array store the txs that were settled in Alien Chain
      txIdsAlienPushed = [];
+
+     txIdsMikeRevert = [];
       
       for (let i=0; i<tradesToPushAlien.length; i++) {
         for (let j=0; j<drexSigners.length ; j++) {
@@ -184,7 +187,10 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
         if (alienSigners[j].address == tradesToPushAlien[i][1]) {
             // confirms if txId is not already pushed
         if (txIdsAlienPushed.indexOf(tradesToPushAlien[i][8])==-1) {
+          // the below if warrants that transactions are not expired
           if (tradesToPushAlien[i][7]>=tradesToPushAlien[i][9]) { // not expired transactions
+          // the below requirement splits the transactions in two to test Mike Revert
+          if (i%2 == 0) { //only odd transactions to test MikeRevert in Drex Listrack
        await alienListrack.connect(alienSigners[j]).
         writeAlienLeg(tradesToPushAlien[i][0],
         tradesToPushAlien[i][1], // alice Alien Address
@@ -193,6 +199,9 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
         tradesToPushAlien[i][6],tradesToPushAlien[i][7],
         tradesToPushAlien[i][8],tradesToPushAlien[i][9]);
         txIdsAlienPushed.push(tradesToPushAlien[i][8]);
+          } else { // the below block is for storing transactions to MiketoRevert
+        txIdsMikeRevert.push(tradesToPushAlien[i][8]);
+          }
           }
         }
         }
@@ -206,7 +215,9 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
   TxValidation = [];
   
   const alfred      = drexSigners [0];
+  const bob         = drexSigners [1];
   const alfredAlien = alienSigners[0];
+  const bobAlien    = alienSigners[1];
   
   // array with slots to be searched
     slotNumber = [];
@@ -286,17 +297,37 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     
     console.log ("** Cross-chain tranfers completed **");
     console.log ("** Cross-chain tranfers completed **");
+
+
+    console.log ("** Starting Mike Drex Revert **");
+    console.log ("** Starting Mike Drex Revert **");
+    
+    await time.increase(alienExpiration*timeSlotDrex); //
+    // writing a transaction below in Listrack only to make slotTimechange
+    await Listrack.connect(alfred).setTrade(
+      [alfred.address,
+      bob.address,
+      drexToken.target],
+      100000000000000,
+      [merkleContract.target],
+      [alfredAlien.address,
+      bobAlien.address,
+      alienToken.target],
+      1000000000000,
+      '0x0000000000000000000000000000000000000000000000000000000000000000');
+
+    // time is increased above to force Mike txs to expire
+    for (let i=0 ; i<= txIdsMikeRevert[i] ; i++) {
+    expect (await Listrack.connect(alfred)
+    .mikeManualRevert(txIdsMikeRevert[i])) // 
+     .to.emit(Listrack,"tradeReverted");
+    }
+   // }
+
   });
 
-
-
-
-
-
-
-
-
-
+  console.log ("** End Mike Drex Revert **");
+  console.log ("** End Mike Drex Revert **");
 
 });
 
