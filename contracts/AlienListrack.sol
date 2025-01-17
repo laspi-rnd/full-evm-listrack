@@ -182,12 +182,12 @@ contract AlienListrack is ReentrancyGuard {
             )
         );  // _counter,
 
-        console.log ("Entered Write Alien Leg");
-        console.log ("Drex Index", _drexTxIndex);
-        console.log ("Drex Index must be equal or higher than DrexConfirmation Index (voted) :"
-        , drexConfirmationIndex);
-        console.log ("Drex Index must be equal or higher than DrexAlien Index (informed by user) :"
+        //console.log ("Entered Write Alien Leg");
+        console.log (">> Drex Index", _drexTxIndex);
+        console.log (">> Drex Index must be equal or higher than DrexAlien Index (informed by user) :"
         , _drexAlienConfirmationIndex);
+        console.log (">> Drex Index must be equal or higher than DrexConfirmation Index (voted) :"
+        , drexConfirmationIndex);
         //console.log ("Hashed Secret");
         //console.logBytes32 (_hashedSecret);
 
@@ -224,7 +224,7 @@ contract AlienListrack is ReentrancyGuard {
                 transactions[_drexTxId].timeStampInserted = block.timestamp;
                 emit AlienSettled(_drexTxId,slotProduction.currentSlot,
                                     chainConfirmedTx[slotProduction.currentSlot].length-1);
-                console.log ("Alien Leg Settled");
+                console.log ("** Alien Leg Settled **");
             }   
         // the below block is for HTLC transactions- values are locked in Alien Smart Contract
         } else {
@@ -256,10 +256,10 @@ contract AlienListrack is ReentrancyGuard {
                 transactions[_drexTxId].timeStampInserted = block.timestamp;
                 emit AlienLocked(_drexTxId,slotProduction.currentSlot,
                                     chainConfirmedTx[slotProduction.currentSlot].length-1);
-                console.log ("Alien Leg Locked");
+                console.log ("** Alien Leg Locked **");
             }  
         }
-        console.log ("Alien Leg Written ?",success); 
+        // console.log ("Alien Leg Written ?",success); 
         //return success;  
     }
 
@@ -355,16 +355,16 @@ contract AlienListrack is ReentrancyGuard {
     function updateTimeSlot () private {
 
         uint256 _ellapsedTime = block.timestamp - slotProduction.lastTimeStamp;
-        console.log (">> Ellapsed Time: ", _ellapsedTime);
-        console.log (">> Current Slot: ", slotProduction.currentSlot);  
+        console.log (">> ALIEN Ellapsed Time: ", _ellapsedTime);
+        console.log (">> ALIEN Current Slot: ", slotProduction.currentSlot);  
         //console.log (">> Time Slot Confirmation: ", timeSlotConfirmation);
         if (_ellapsedTime>=timeSlotConfirmation) {
-        console.log (">> Creating new time slot");
+        console.log (">> ALIEN Creating new time slot");
         // for each new slot produced the head of the slot is written
         // console.log ("Creating new time slot"); 
         slotProduction.currentSlot+= ((_ellapsedTime*1000000)/timeSlotConfirmation)/1000000;
         // it increases the slot time by one in order to classify transactions
-        console.log (">> New Slot after Ellapsed Time Update: ", slotProduction.currentSlot);
+        console.log (">> ALIEN New Slot after Ellapsed Time Update: ", slotProduction.currentSlot);
         slotProduction.lastTimeStamp = block.timestamp;
         }
     }

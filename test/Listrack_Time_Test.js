@@ -12,7 +12,7 @@ const {loadFixture} = require("@nomicfoundation/hardhat-toolbox/network-helpers"
 
 const {time} = require("@nomicfoundation/hardhat-network-helpers");
 
-describe("Cross-Chain Great Volume of Tx | Automatic Settlement by Merkle Contract", function() {
+describe("Reverts Tests with Great Volume of Tx | Automatic Revert by Merkle Contract", function() {
 
 async function InitialSetupFixture() {
 
@@ -187,10 +187,10 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
         if (alienSigners[j].address == tradesToPushAlien[i][1]) {
             // confirms if txId is not already pushed
         if (txIdsAlienPushed.indexOf(tradesToPushAlien[i][8])==-1) {
-          // the below if warrants that transactions are not expired
+          // the below warrants that transactions are not expired
           if (tradesToPushAlien[i][7]>=tradesToPushAlien[i][9]) { // not expired transactions
           // the below requirement splits the transactions in two to test Mike Revert
-          if (i%2 == 0) { //only odd transactions to test MikeRevert in Drex Listrack
+        //  if (i%2 == 0) { //only odd transactions to test MikeRevert in Drex Listrack
        await alienListrack.connect(alienSigners[j]).
         writeAlienLeg(tradesToPushAlien[i][0],
         tradesToPushAlien[i][1], // alice Alien Address
@@ -199,9 +199,14 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
         tradesToPushAlien[i][6],tradesToPushAlien[i][7],
         tradesToPushAlien[i][8],tradesToPushAlien[i][9]);
         txIdsAlienPushed.push(tradesToPushAlien[i][8]);
-          } else { // the below block is for storing transactions to MiketoRevert
-        txIdsMikeRevert.push(tradesToPushAlien[i][8]);
-          }
+        //  } else { // the below block is for storing transactions to MiketoRevert
+            // else of odd transactions
+        //  }
+          } else {
+            if (txIdsMikeRevert.indexOf(tradesToPushAlien[i][8])==-1) {
+            txIdsMikeRevert.push(tradesToPushAlien[i][8]);
+            console.log ("**Trades to Revert ", tradesToPushAlien[i][8]);
+            }
           }
         }
         }
@@ -299,8 +304,10 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     console.log ("** Cross-chain tranfers completed **");
 
 
-    console.log ("** Starting Mike Drex Revert **");
-    console.log ("** Starting Mike Drex Revert **");
+    /*
+
+    console.log ("** Starting Mike Manual Drex Revert **");
+    console.log ("** Starting Mike Manual Drex Revert **");
     
     await time.increase(alienExpiration*timeSlotDrex); //
     // writing a transaction below in Listrack only to make slotTimechange
@@ -324,10 +331,40 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     }
    // }
 
-  });
+  console.log ("** End Mike Drex Revert **");
+  console.log ("** End Mike Drex Revert **");
+
+  */
+
+    console.log ("** Starting Automatic Revert **");
+    console.log ("** Starting Automatic Revert **");
+    
+    await time.increase(alienExpiration*timeSlotDrex); //
+    // writing a transaction below in Listrack only to make slotTimechange
+    await Listrack.connect(alfred).setTrade(
+      [alfred.address,
+      bob.address,
+      drexToken.target],
+      100000000000000,
+      [merkleContract.target],
+      [alfredAlien.address,
+      bobAlien.address,
+      alienToken.target],
+      1000000000000,
+      '0x0000000000000000000000000000000000000000000000000000000000000000');
+
+    // time is increased above to force Mike txs to expire
+
+    expect (await (merkleContract.connect(oliver).revertTxs(Listrack.target)))
+            .to.emit(Listrack,"tradeReverted");
 
   console.log ("** End Mike Drex Revert **");
   console.log ("** End Mike Drex Revert **");
+
+
+  });
+
+  
 
 });
 

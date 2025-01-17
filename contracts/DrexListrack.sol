@@ -206,7 +206,7 @@ pragma solidity ^0.8.24;
     // it updates the last confirmed slot of those Txs in order to revert old transactions
     // this variable restricts confirmed slots only by the Merkle Contracts that are allowed
     // by the counterparties to do such task
-    mapping (address => uint256) private lastConfirmedSlotByMerkleContract;
+    // mapping (address => uint256) private lastConfirmedSlotByMerkleContract;
 
     // it stores the last Reverted Slot by each Merkle Contract
     mapping (address => uint256) private lastRevertedSlotByMerkleContract;
@@ -434,8 +434,8 @@ pragma solidity ^0.8.24;
         //  console.log("Drex Merkle Contract One",trades[_txId].drexMerkleContract[0]);
         //  console.log("Drex Merkle Contract Two",trades[_txId].drexMerkleContract[1]);
 
-        console.log         ("# Trade Registered :");
-        console.logBytes32  (_txId);
+     //   console.log         ("# Trade Registered :");
+     //   console.logBytes32  (_txId);
 
         // Mike can automatically lock transaction whether he is the sender
         if (msg.sender == _drexAddresses[1]) {
@@ -457,8 +457,8 @@ pragma solidity ^0.8.24;
         //console.log ("Drex Tx Index", chainDrexTx.length-1);
         //console.log ("Drex Tx Id");
         //console.logBytes32 (_txId);
-        console.log ("Drex Alien Confirmation Index",
-        slotProduction.lowerLimitDrexIndexAlienConfirmation);
+       // console.log ("Drex Alien Confirmation Index",
+       // slotProduction.lowerLimitDrexIndexAlienConfirmation);
     }
 
     // Function for Mike to agree on Alice's terms and lock his DREX
@@ -500,6 +500,8 @@ pragma solidity ^0.8.24;
         } 
         emit lockedTxId(_txId);
         updateChain (trades[_txId].statusChain.chainPosition);
+        //console.log ("!!!!!!!! LOCKED Transaction Successful : ");
+        //console.logBytes32(_txId);
         }
         // return (_success);
     }
@@ -510,7 +512,7 @@ pragma solidity ^0.8.24;
         //returns (bool) {
         // Important : anyone can settle the Transaction informing the Merkle Proof! 
         // Any msg.sender, not only Alice, can send Tx for settlement
-         bool success = false;
+        bool success = false;
         Trade memory trade = trades[_txId];
 
         require(trade.aliceDrexAddress != address(0), "Trade does not exist");
@@ -540,7 +542,7 @@ pragma solidity ^0.8.24;
             if (trade.hashedSecret!=bytes32(0)) {
                     emit manualSecretTradeSettled (_txId,_secretRevealed);
             } else  emit manualTradeSettled (_txId);
-            console.log ("Transaction Successful");
+            
         } else {
             console.log ("Transaction Failed | Id below");
             console.logBytes32(_txId);
@@ -592,10 +594,12 @@ pragma solidity ^0.8.24;
 
          // the below statemente assumes that the Merkle Contract is being capable
          // of reading the alienstate due to having success in confirming alien Txs
+         /*
          if (trade.statusChain.slotNumber > lastConfirmedSlotByMerkleContract[msg.sender]) {
          lastConfirmedSlotByMerkleContract[msg.sender] = trade.statusChain.slotNumber;
          // the above statement updates the last confirmed block by the msg.sender Merkle Contract
          }
+         */
         } 
         }
         }
@@ -614,6 +618,9 @@ pragma solidity ^0.8.24;
       //  require(trades[_txId].mikeDrexAddress == msg.sender,
       //   "Unauthorized - Only Mike can revert");
       // anyone can revert the Mike Tx whether he has this right to receive
+
+      console.log ("Entered Manual Revert : Trade Id");
+      console.logBytes32(_txId);
          
         require(!trades[_txId].statusChain.settled, 
         "Trade already settled");
@@ -621,9 +628,9 @@ pragma solidity ^0.8.24;
         require(trades[_txId].statusChain.locked, 
         "Trade not locked yet to revert");
 
-        console.log ("Current Slot :",slotProduction.currentSlot);
-        console.log ("Tx Slot :", trades[_txId].statusChain.slotNumber);
-        console.log ("Listrack Expiration :", listrackExpiration);
+        //console.log (">> Current Slot :",slotProduction.currentSlot);
+        //console.log (">> Tx Slot :", trades[_txId].statusChain.slotNumber);
+        //console.log (">> Listrack Expiration :", listrackExpiration);
 
         require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
                 >= listrackExpiration ,"Listrack transaction not expired yet");
@@ -643,7 +650,7 @@ pragma solidity ^0.8.24;
     }
 
     function revertTransaction (bytes32 _txId) private
-        returns (bool,uint256) {
+        returns (bool) {
         bool success = false;
 
         // require cannot be used below because it would stop
@@ -663,28 +670,40 @@ pragma solidity ^0.8.24;
         if (success) emit tradeReverted(_txId);
         }
         }
-        return (success,trades[_txId].statusChain.slotNumber);
+        return (success);
     }
     
     function revertTxsbyMerkleContract (address _merkleContract)
     // this function reverts transactions that are expired in the Merkle Contract
     // based on the last confirmed block by the Merkle Contract
+    // this is done rather than unlocking several transactions simultaneously
+    // due to gas costs in Drex that should be charged to a Merkle Contract
     external nonReentrant {
-        uint256 _drexConfirmedSlotNumber = lastConfirmedSlotByMerkleContract[_merkleContract];
-        uint256 _lastSlotReverted = 0;
-        uint256 _lastSlot = 0;
-        if (_drexConfirmedSlotNumber > lastRevertedSlotByMerkleContract[_merkleContract]) {
+       // uint256 _drexConfirmedSlotNumber = lastConfirmedSlotByMerkleContract[_merkleContract];
+        uint256 _upperLimitSlotToRevert = slotProduction.currentSlot-listrackExpiration;
+        uint256 _lastSlotReverted = lastRevertedSlotByMerkleContract[_merkleContract];
+       // console.log (">> Upper Slot Limit to Revert", _upperLimitSlotToRevert);
+       // console.log (">> lastRevertedSlotByMerkleContract ", lastRevertedSlotByMerkleContract[_merkleContract]);
+        if (_upperLimitSlotToRevert > lastRevertedSlotByMerkleContract[_merkleContract]) {
+        // this conditional verifies whether time has passed through avoiding unnecessary calls
+       // console.log ("Automatically Reverting started");
         for (uint256 i = lastRevertedSlotByMerkleContract[_merkleContract]+1; 
-                i<=_drexConfirmedSlotNumber; i++) {
+                i<=_upperLimitSlotToRevert; i++) { // loop iterating through blocks not reverted
+         //   console.log ("Number of slot to Revert", i );
+           // console.log ("Number of Txs to Revert", merkleContractRevert[_merkleContract][i].length);
             for (uint256 j=0 ; j < merkleContractRevert[_merkleContract][i].length ; j++) {
+                // loop iterating through transactions to revert in each block
             bool _success = false;
             // merkleContractRevert is a mapping that stores for each Merkle Contract one specific Block
             // that contain all expiring TxIds that are expiring in that block
-             (_success, _lastSlot) = revertTransaction (merkleContractRevert[_merkleContract][i][j]);  
-             if ((_success) && (_lastSlot > _lastSlotReverted)) _lastSlotReverted = _lastSlot;
+          //  console.log ("Tx to Revert :");
+          //  console.logBytes32 (merkleContractRevert[_merkleContract][i][j]);
+            _success = revertTransaction (merkleContractRevert[_merkleContract][i][j]);  
+             if ((_success) && (i > _lastSlotReverted)) _lastSlotReverted = i;
             }
                 }
         lastRevertedSlotByMerkleContract[_merkleContract] = _lastSlotReverted;   
+       // console.log ("Last Slot Reverted:", _lastSlotReverted);
         }
     }
 
@@ -740,8 +759,20 @@ pragma solidity ^0.8.24;
             // which can be in charge for reversals and settlements
             //it defines that each Merkle Contract has several txId attached to it
             // each txId can have several Merkle Contracts attached to it
+        //console.log ("!!! Slot Number to Store Revert:", trades[_txId].statusChain.slotNumber+listrackExpiration);
         merkleContractRevert[trades[_txId].drexMerkleContract[i]]
         [trades[_txId].statusChain.slotNumber+listrackExpiration].push(_txId);
+
+        /*
+        console.log ("!!!Transaction trying to push to MerkleContractRevert");
+        console.logBytes32 (_txId);
+        console.log ("!!!Last Id of transaction pushed must equal to _txId given above");
+        console.logBytes32 (merkleContractRevert[trades[_txId].drexMerkleContract[i]]
+        [trades[_txId].statusChain.slotNumber+listrackExpiration]
+        [merkleContractRevert[trades[_txId].drexMerkleContract[i]]
+        [trades[_txId].statusChain.slotNumber+listrackExpiration].length-1]);
+        */
+        
         }
     }
 
@@ -761,12 +792,12 @@ pragma solidity ^0.8.24;
         console.log (">>> Ellapsed Time: ", _ellapsedTime);
         // all code below depends on a new block production
 
-     //   console.log ("Current Slot: ", slotProduction.currentSlot);
+        console.log ("Current Slot: ", slotProduction.currentSlot);
 
         if (_ellapsedTime>=timeSlot) {
-            console.log (">>> Creating new time slot");
+        console.log (">>> Creating new time slot");
         // for each new slot produced the head of the slot is written
-      //  console.log ("Creating new time slot");
+        console.log ("Creating new time slot");
         console.log (">>> Current Slot: ", slotProduction.currentSlot);   
         slotProduction.currentSlot+= ((_ellapsedTime*1000000)/timeSlot)/1000000;
         // it increases the slot time by one in order to classify transactions
@@ -780,7 +811,7 @@ pragma solidity ^0.8.24;
         // and confirming transactions in Alien Chain through sending that indexId to
         // Alien Chain
         slotHeadTxIndex[slotProduction.currentSlot] = _indexId;
-        console.log ("New Slot Head Index : ", (slotHeadTxIndex[slotProduction.currentSlot]));
+        console.log (">>> New Slot Head Index after New Slot Created : ", (slotHeadTxIndex[slotProduction.currentSlot]));
         //console.log ("New blockHead Tx Id : ");
         //console.logBytes32 (blockHead[block.number].TxId);
             // at least a minimum number of blocks must happen before emitting the event in the blockchain
@@ -788,32 +819,33 @@ pragma solidity ^0.8.24;
             // this is to avoid the first slots that are not yet to be expired
             // 1000 is the minimum slot to be considered in the slot chain
 
-        console.log ("Before Loop");
-        console.log ("LowerLimitSlot",lowerLimitSlotAlienConfirmation);
-        console.log ("Genesis Slot:", slotProduction.genesisSlot);
+      //  console.log ("Before Loop");
+     //   console.log ("LowerLimitSlot",lowerLimitSlotAlienConfirmation);
+      //  console.log ("Genesis Slot:", slotProduction.genesisSlot);
         
         // the below statement asserts that slots before the genesis slot are not considered
         if    (lowerLimitSlotAlienConfirmation>slotProduction.genesisSlot) {
 
             console.log ("Need to pass here for DrexTxIndex Alien Confirmation");
-
-            while (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]==
-                    slotProduction.lowerLimitDrexIndexAlienConfirmation) {
-            console.log ("Drex Index to update: ",slotHeadTxIndex[lowerLimitSlotAlienConfirmation]);
-            console.log ("Current Drex Index :", slotProduction.lowerLimitDrexIndexAlienConfirmation);
+            while ((slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == uint256(0)) || 
+                   (slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == 
+                   slotProduction.lowerLimitDrexIndexAlienConfirmation)) {
+            console.log (">>> Drex Index to update: ",slotHeadTxIndex[lowerLimitSlotAlienConfirmation]);
+            console.log (">>> Current Drex Index :", slotProduction.lowerLimitDrexIndexAlienConfirmation);
                 lowerLimitSlotAlienConfirmation++;  
-              console.log ("Not leaving loop");
-              //  console.log ("Lower Limit Slot Alien Confirmation: ", lowerLimitSlotAlienConfirmation);
+            //  console.log ("Not leaving loop");
+            console.log ("Lower Limit Slot Alien Confirmation changing in Loop: ", lowerLimitSlotAlienConfirmation);
                 // it is required to find the oldest slot of transactions to expire
             }
             // the code below updates the Tx Index which expires in alien confirmation blocks
             // the blockProduction index is lower than the current one 
             // because it will expire in the future
+            if (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]!=uint256(0)) {
             slotProduction.lowerLimitDrexIndexAlienConfirmation = 
             slotHeadTxIndex[lowerLimitSlotAlienConfirmation];
-            
-          //  console.log("New Alien Contirmation Tx Index to Expire in Future: "
-          //  , slotProduction.lowerLimitDrexIndexAlienConfirmation);
+            } 
+            console.log("New Alien Contirmation Tx Index to Expire in Future: "
+            , slotProduction.lowerLimitDrexIndexAlienConfirmation);
             emit drexIndexAlienConfirmation (slotProduction.lowerLimitDrexIndexAlienConfirmation);
         }
         // below is the code when achieving window time

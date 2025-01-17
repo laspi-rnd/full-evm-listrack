@@ -11,8 +11,8 @@ pragma solidity ^0.8.24;
 
     interface I_Listrack {
     function sendTxForSettlement (bytes32[] memory) external;
-        }
-
+    function revertTxsbyMerkleContract (address _merkleContract) external;
+    }
 
     contract MerkleContract is ReentrancyGuard  {
 
@@ -361,6 +361,12 @@ pragma solidity ^0.8.24;
             _success = true;
         } 
         return (_success);
+    }
+
+    // function to revert txs in Listrack automatically
+    // gas fees are charged in the current contract
+    function revertTxs (address _drexListrack) external nonReentrant {
+        I_Listrack(_drexListrack).revertTxsbyMerkleContract(address(this));
     }
 
     function payTxToMerkleContract (bytes32 _TxId) external 
