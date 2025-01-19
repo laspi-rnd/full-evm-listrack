@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/henrique/listrack/contracts/AlienListrack.sol": {
-      "lastModificationDate": 1737145500292,
+      "lastModificationDate": 1737316885658,
       "contentHash": "a496bbc3d6ed218f4230535b39d2e0a8",
       "sourceName": "contracts/AlienListrack.sol",
       "solcConfig": {
@@ -419,7 +419,7 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexMerkle.sol": {
-      "lastModificationDate": 1737143424584,
+      "lastModificationDate": 1737316879455,
       "contentHash": "968ebef519ec8d0ffe7abecf2a5cf679",
       "sourceName": "contracts/DrexMerkle.sol",
       "solcConfig": {
@@ -460,8 +460,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexListrack.sol": {
-      "lastModificationDate": 1737152913158,
-      "contentHash": "2de53f37bd3a6af4f8fece5a488b80dd",
+      "lastModificationDate": 1737316875590,
+      "contentHash": "851c7ef068ef813eede2affc9fedb9be",
       "sourceName": "contracts/DrexListrack.sol",
       "solcConfig": {
         "version": "0.8.24",

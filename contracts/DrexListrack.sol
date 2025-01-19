@@ -163,6 +163,9 @@ pragma solidity ^0.8.24;
 
     // listrackExpiration in slots required for cancelling a Listrack transaction in both chains
     uint256 private listrackExpiration;
+
+    bool leftIndex_0 = false;
+    // this boolean controls update Chain when the block head index moves to a number rather than zero
     
     // ** TRADE VARIABLES ** //
 
@@ -786,7 +789,7 @@ pragma solidity ^0.8.24;
         slotProduction.lowerLimitDrexIndexAlienConfirmation);
     }
 
-     function updateChain (uint256 _indexId) private {
+      function updateChain (uint256 _indexId) private {
 
         uint256 _ellapsedTime = block.timestamp - slotProduction.lastTimeStamp;
         console.log (">>> Ellapsed Time: ", _ellapsedTime);
@@ -797,8 +800,8 @@ pragma solidity ^0.8.24;
         if (_ellapsedTime>=timeSlot) {
         console.log (">>> Creating new time slot");
         // for each new slot produced the head of the slot is written
-        console.log ("Creating new time slot");
-        console.log (">>> Current Slot: ", slotProduction.currentSlot);   
+        // console.log ("Creating new time slot");
+        console.log (">>> Old Slot: ", slotProduction.currentSlot);   
         slotProduction.currentSlot+= ((_ellapsedTime*1000000)/timeSlot)/1000000;
         // it increases the slot time by one in order to classify transactions
         console.log (">>> New Slot after Ellapsed Time Update: ", slotProduction.currentSlot);
@@ -820,16 +823,21 @@ pragma solidity ^0.8.24;
             // 1000 is the minimum slot to be considered in the slot chain
 
       //  console.log ("Before Loop");
-     //   console.log ("LowerLimitSlot",lowerLimitSlotAlienConfirmation);
+          //  console.log ("LowerLimitSlot before Loop",lowerLimitSlotAlienConfirmation);
       //  console.log ("Genesis Slot:", slotProduction.genesisSlot);
         
         // the below statement asserts that slots before the genesis slot are not considered
         if    (lowerLimitSlotAlienConfirmation>slotProduction.genesisSlot) {
-
-            console.log ("Need to pass here for DrexTxIndex Alien Confirmation");
-            while ((slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == uint256(0)) || 
-                   (slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == 
-                   slotProduction.lowerLimitDrexIndexAlienConfirmation)) {
+            // if the head transaction is indexed as zero, the following instructions cannot happen
+                // if the head transaction is indexed as zero, the following instructions cannot happen
+            console.log ("LowerLimitSlot before Loop",lowerLimitSlotAlienConfirmation);
+            while ((slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == uint256(0))){ 
+            if (!leftIndex_0) {
+                leftIndex_0 = true;
+                break;
+                // next time in this loop a new slot will be created in index cannot be zero anymore
+            }
+            // || (slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == slotProduction.lowerLimitDrexIndexAlienConfirmation)) 
             console.log (">>> Drex Index to update: ",slotHeadTxIndex[lowerLimitSlotAlienConfirmation]);
             console.log (">>> Current Drex Index :", slotProduction.lowerLimitDrexIndexAlienConfirmation);
                 lowerLimitSlotAlienConfirmation++;  
@@ -837,13 +845,14 @@ pragma solidity ^0.8.24;
             console.log ("Lower Limit Slot Alien Confirmation changing in Loop: ", lowerLimitSlotAlienConfirmation);
                 // it is required to find the oldest slot of transactions to expire
             }
+            
             // the code below updates the Tx Index which expires in alien confirmation blocks
             // the blockProduction index is lower than the current one 
             // because it will expire in the future
-            if (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]!=uint256(0)) {
+           // if (slotHeadTxIndex[lowerLimitSlotAlienConfirmation]!=uint256(0)) {
             slotProduction.lowerLimitDrexIndexAlienConfirmation = 
             slotHeadTxIndex[lowerLimitSlotAlienConfirmation];
-            } 
+          //  } 
             console.log("New Alien Contirmation Tx Index to Expire in Future: "
             , slotProduction.lowerLimitDrexIndexAlienConfirmation);
             emit drexIndexAlienConfirmation (slotProduction.lowerLimitDrexIndexAlienConfirmation);
@@ -852,6 +861,9 @@ pragma solidity ^0.8.24;
         //slotProduction.lastSlot = slotProduction.lastSlot;
         slotProduction.lastTimeStamp = block.timestamp;
         // console.log (">>>>>> Chain updated");   
+
+        // this statement controls whether Confirmed Index slot Head moved from zero
+        // moved from zero
         }
     }
 
