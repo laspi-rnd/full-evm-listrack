@@ -835,7 +835,7 @@ pragma solidity ^0.8.24;
             if (!leftIndex_0) {
                 leftIndex_0 = true;
                 break;
-                // next time in this loop a new slot will be created in index cannot be zero anymore
+                // next time in this loop a new slot will be created whose index cannot be zero anymore
             }
             // || (slotHeadTxIndex[lowerLimitSlotAlienConfirmation] == slotProduction.lowerLimitDrexIndexAlienConfirmation)) 
             console.log (">>> Drex Index to update: ",slotHeadTxIndex[lowerLimitSlotAlienConfirmation]);
