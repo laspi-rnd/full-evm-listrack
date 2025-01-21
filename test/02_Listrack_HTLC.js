@@ -15,9 +15,15 @@ const {time} = require("@nomicfoundation/hardhat-network-helpers");
 describe("Reverts Tests with Great Volume of Tx | Automatic Revert by Merkle Contract", function() {
 
 async function InitialSetupFixture() {
-/*
+
+  const secret = '0x956ea5776a6ad4a12929763dc99687add2db4b2ea3d3c8a120463f2b76d03ab3';
+  const hashedsecret = '0x22c070e98497e9492cdbcb2749e29b8dab14fc6c26686dbc727e611f62716580';
+
+  /*
     const secret = "listrack";
-    const _secretBytes32 = ethers.utils.solidityPack(["string"],[secret]);
+   // const _secretBytes32 = ethers.utils.solidityPack(["string"],[secret]);
+   const _secretBytes32 = ethers.solidityPackedKeccak256(["string"],[secret]);
+    console.log (_secretBytes32);
     _secretBytes32 = ethers.utils.solidityKeccak256(["string"],[_secretBytes32]);
 
     console.log (_secretBytes32)
@@ -129,7 +135,7 @@ for (let i = 0; i < drexSigners.length; i++) {
       alienSigners[i+1].address,
       alienToken.target],
       j,
-      '0x0000000000000000000000000000000000000000000000000000000000000000'))
+      hashedsecret))
       .to.changeTokenBalances(drexToken, [drexSigners[i+1],Listrack], [-j,j]);
     }
     }
@@ -263,49 +269,32 @@ for (let i = 0; i < drexSigners.length; i++) {
   
     console.log ("** Tx can now be automatically settled in Drex by a Merkle Contract **");
     /// MERKLE CONTRACT REACHED CONSENSUS ON ALIEN CHAIN
-    
-     /// SENDING TRANSACTIONS FOR SETTLEMENT IN DREX LISTRACK BY MERKLE CONTRACTS
-     /// SENDING TRANSACTIONS FOR SETTLEMENT IN DREX LISTRACK BY MERKLE CONTRACTS
-
-    TxIdToSettle = [];
-    TxIndexToSettle = [];
-    merkleProofArray = [];
-    slotArray = [];
-
-    for (let i=0; i<TxValidation.length; i++) {
-    TxIdToSettle.push(TxValidation[i][0]);
-    merkleProofArray.push(Object.values(TxValidation[i][2]));
-    TxIndexToSettle.push(TxValidation[i][1]);
-    slotArray.push(TxValidation[i][3]);
+   
+      for (let i=0; i<TxValidation.length; i++) {
+        merkleProof = Object.values(TxValidation[i][2]);
+       expect (await Listrack.connect(alfred)  // anyone can settle the Trade not only Alice
+                      .aliceSettleTrade(TxValidation[i][0],TxValidation[i][1],
+                       merkleProof,TxValidation[i][3],
+                        secret))
+                .to.emit(Listrack,"manualSecretTradeSettled");
       }
-
-    merkleContract.connect(oliver);
-    
-    // for (i=0; i<=10 ; i++) { // it cannot be used for reentrancy because each iteration creates a new block
-    expect (await merkleContract.connect(oliver) // oliver is a merkle signer
-                       .validateSomeTxForSettlement(TxIdToSettle,    // txIds
-                                                    TxIndexToSettle, // index
-                                                    merkleProofArray, // bidimensional array
-                                                    slotArray, // slot number
-                                                    Listrack.target)) // 
-                        .to.emit(Listrack,"automaticTradeSettled");
-                      // }
+  
     
     console.log ("** Cross-chain tranfers completed **");
     console.log ("** Cross-chain tranfers completed **");
 
     return {drexSigners,alienSigners,merkleSigners,
       drexToken,alienToken,merkleContract,Listrack,alienListrack,
-          equalbalance,timeSlotDrex};
+          equalbalance,timeSlotDrex,TxValidation,secret};
   
     }
 
-    it("Mike manually reverts his funds",
+    it("Mike unlock his funds in Alien Listrack",
           async function() {
           
               const {drexSigners,alienSigners,merkleSigners,
                   drexToken,alienToken,merkleContract,Listrack,alienListrack,
-                  equalbalance,timeSlotDrex} 
+                  equalbalance,timeSlotDrex,TxValidation,secret} 
                   = await loadFixture (InitialSetupFixture);
 
                   const alfred      = drexSigners [0];
@@ -313,76 +302,25 @@ for (let i = 0; i < drexSigners.length; i++) {
                   const alfredAlien = alienSigners[0];
                   const bobAlien    = alienSigners[1];
 
-    console.log ("** Starting Mike Manual Drex Revert **");
-    console.log ("** Starting Mike Manual Drex Revert **");
+    console.log ("** Starting Mike Unlocking his Funds in Alien Listrack **");
+    console.log ("** Starting Mike Unlocking his Funds in Alien Listrack **");
     
-    await time.increase(alienExpiration*timeSlotDrex); //
+   // await time.increase(alienExpiration*timeSlotDrex); //
     // writing a transaction below in Listrack only to make slotTimechange
-    await Listrack.connect(alfred).setTrade(
-      [alfred.address,
-      bob.address,
-      drexToken.target],
-      100000000000000,
-      [merkleContract.target],
-      [alfredAlien.address,
-      bobAlien.address,
-      alienToken.target],
-      1000000000000,
-      '0x0000000000000000000000000000000000000000000000000000000000000000');
+    console.log ('#########################');
+    console.log (TxValidation.length);
 
-    // time is increased above to force Mike txs to expire
-    for (let i=0 ; i<= txIdsMikeRevert[i] ; i++) {
-    expect (await Listrack.connect(alfred)
-    .mikeManualRevert(txIdsMikeRevert[i])) // 
-     .to.emit(Listrack,"tradeReverted");
+    for (let i=0 ; i< TxValidation.length ; i++) {
+    expect (await alienListrack.connect(alfredAlien)
+    .mikeSettleTrade(TxValidation[i][0],secret)) // 
+     .to.emit(alienListrack,"AlienSettled");
     }
    // }
 
-  console.log ("** End Mike Drex Revert **");
-  console.log ("** End Mike Drex Revert **");
+  console.log ("** End **");
+  console.log ("** End  **");
 
           });
-
-    it("Trades reverted in batches by Merkle Contracts",
-    async function() {
-
-      const {drexSigners,alienSigners,merkleSigners,
-        drexToken,alienToken,merkleContract,Listrack,alienListrack,
-        equalbalance,timeSlotDrex} 
-        = await loadFixture (InitialSetupFixture);
-
-        const alfred      = drexSigners [0];
-        const bob         = drexSigners [1];
-        const alfredAlien = alienSigners[0];
-        const bobAlien    = alienSigners[1];
-        const oliver      = merkleSigners[0];    
-
-    console.log ("** Starting Automatic Revert **");
-    console.log ("** Starting Automatic Revert **");
-    
-    await time.increase(alienExpiration*timeSlotDrex); //
-    // writing a transaction below in Listrack only to make slotTimechange
-    await Listrack.connect(alfred).setTrade(
-      [alfred.address,
-      bob.address,
-      drexToken.target],
-      100000000000000,
-      [merkleContract.target],
-      [alfredAlien.address,
-      bobAlien.address,
-      alienToken.target],
-      1000000000000,
-      '0x0000000000000000000000000000000000000000000000000000000000000000');
-
-    // time is increased above to force Mike txs to expire
-
-    expect (await (merkleContract.connect(oliver).revertTxs(Listrack.target)))
-            .to.emit(Listrack,"tradeReverted");
-
-  console.log ("** End Automatic Revert **");
-  console.log ("** End Automatic Revert **");
-
-      });
 
 
   });

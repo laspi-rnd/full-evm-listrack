@@ -268,7 +268,9 @@ contract AlienListrack is ReentrancyGuard {
         // ARRUMAR ABAIXO
         bool success = false;
 
-        require (msg.sender == transactions[_txId].mikeAddress, "Only Mike can settle the trade");
+        // anyone can send Mike funds to him again becaus
+        // the tx is updated with refunded = true;
+        // require (msg.sender == transactions[_txId].mikeAddress, "Only Mike can settle the trade");
 
         require (transactions[_txId].hashedSecret!=bytes32(0),"This is not a HTLC transaction");
 

@@ -708,6 +708,13 @@ pragma solidity ^0.8.24;
         lastRevertedSlotByMerkleContract[_merkleContract] = _lastSlotReverted;   
        // console.log ("Last Slot Reverted:", _lastSlotReverted);
         }
+        /*
+        console.log ('#######################');
+        bytes32 _hashedSecret = keccak256(abi.encodePacked('Listrack'));  // _counter,)
+        console.logBytes32(_hashedSecret);
+        console.logBytes32(keccak256(abi.encodePacked(_hashedSecret))); 
+        */
+
     }
 
     function isValidMerkleContract (bytes32 _txId, address _merkleContract)
