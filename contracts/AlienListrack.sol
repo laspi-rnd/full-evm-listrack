@@ -304,8 +304,8 @@ contract AlienListrack is ReentrancyGuard {
         // ONLY FOR HTLC TRANSACTIONS
         bool success = false;
 
-        require (msg.sender == transactions[_txId].aliceAddress,
-         "Only Alice can get the refund");
+        //require (msg.sender == transactions[_txId].aliceAddress,
+        // "Only Alice can get the refund");
 
         require (transactions[_txId].hashedSecret!=bytes32(0),
         "This is not a HTLC transaction eligible for refund");
