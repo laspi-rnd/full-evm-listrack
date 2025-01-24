@@ -11,7 +11,7 @@ pragma solidity ^0.8.24;
 
 contract DrexToken is ERC20 {
 
-    constructor () ERC20("Token", "TKN") {
+    constructor () ERC20("Token", "Drex TKN") {
         _mint(_msgSender(), 1000000 * (10 ** uint256(decimals())));
 
     console.log ("@@@ Drex Token deployed with number of Tokens equal to :",

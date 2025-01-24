@@ -2,7 +2,7 @@
   "_format": "hh-sol-cache-2",
   "files": {
     "/home/henrique/listrack/contracts/AlienListrack.sol": {
-      "lastModificationDate": 1737589899504,
+      "lastModificationDate": 1737590171633,
       "contentHash": "39d499efdca29e5ebde1832f42fefbc5",
       "sourceName": "contracts/AlienListrack.sol",
       "solcConfig": {
@@ -341,8 +341,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/TokenDrex.sol": {
-      "lastModificationDate": 1736794109937,
-      "contentHash": "b41100bb3b0c0e16b4c288039218d84b",
+      "lastModificationDate": 1737667890761,
+      "contentHash": "fcfa9a5962abe7726bd05ccf5f5ccad1",
       "sourceName": "contracts/TokenDrex.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -380,8 +380,8 @@
       ]
     },
     "/home/henrique/listrack/contracts/TokenAlien.sol": {
-      "lastModificationDate": 1736794109937,
-      "contentHash": "99d42b04aed92294bdc8e6f40b168456",
+      "lastModificationDate": 1737667899939,
+      "contentHash": "a1bdab154581922958ce815747a97e59",
       "sourceName": "contracts/TokenAlien.sol",
       "solcConfig": {
         "version": "0.8.24",
@@ -460,7 +460,7 @@
       ]
     },
     "/home/henrique/listrack/contracts/DrexListrack.sol": {
-      "lastModificationDate": 1737492383354,
+      "lastModificationDate": 1737653539545,
       "contentHash": "fd1e38f21db00c21dfd1c136eb343c9b",
       "sourceName": "contracts/DrexListrack.sol",
       "solcConfig": {
