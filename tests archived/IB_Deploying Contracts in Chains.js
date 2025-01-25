@@ -1,3 +1,5 @@
+// npx hardhat test test\00RegularTx.js
+
 const {expect} = require("chai");
 const { ethers } = require("hardhat");
 const { provider } = ethers.getDefaultProvider();
