@@ -9,7 +9,7 @@ import "./tokens/ERC20.sol";
 
 contract AlienToken is ERC20 {
 
-    constructor () ERC20("AlienToken", "Alien TKN") {
+    constructor () ERC20("AlienToken", "Alien_TKN") {
         _mint(_msgSender(), 1000000 * (10 ** uint256(decimals())));
         console.log ("@@@ Alien Token deployed with number of Tokens equal to :",
                 1000000 * (10 ** uint256(decimals())) );

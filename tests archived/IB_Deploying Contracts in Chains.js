@@ -20,28 +20,35 @@ describe("Deploying Every Contract in every chain", function() {
 
   await hre.switchNetwork('mainnet');
 
-  const [owner,alice,mike] = await ethers.getSigners();
   
+  const [owner,alice,bob,charlie,debbie,eva,mike] = await ethers.getSigners();
+    // //frank,george,harry,irene,jack,kelly,larry,nancy,
+          // oliver to robert are the signers of Merkle Contract
+    //,sally,tom,ursula,victor,wendy,xander,yvonne,zack] 
+    
   const drexSigners = [alice,mike];
   const alienSigners = [alice,mike];
+   // frank,george,harry,irene,jack,kelly,larry,mike,nancy,
   
-  const merkleSigners = [owner,alice,mike];
+  const merkleSigners = [bob,charlie,debbie,eva];
   
   const equalbalance = (10**15); // 18 is the number of decimals
   
   const drexTokenFactory = await ethers.getContractFactory("DrexToken");
-  const drexToken = await drexTokenFactory.connect(owner).deploy();
- // const drexToken = drexTokenFactory.attach('0x7CfdA9c2aE901bA78897594070Db4Dbe264023ba');
+  //const drexToken = await drexTokenFactory.connect(owner).deploy();
+  const drexToken = drexTokenFactory.attach('0x7CfdA9c2aE901bA78897594070Db4Dbe264023ba'); // everyone has Drex Token in Sepolia
 
   console.log ('#######################');
   console.log (drexToken.target);
   console.log (await (drexToken.balanceOf(owner.address)));
   
   // the below code is the first token transfer to users
+  /*
   for (let i = 0; i < drexSigners.length; i++) {
   await drexToken.connect(owner).transfer(drexSigners[i].address, equalbalance);
   expect(await drexToken.balanceOf(drexSigners[i].address)).to.equal(equalbalance);
   }
+  */
 
   /* Setup for alienToken */
 
@@ -70,9 +77,10 @@ describe("Deploying Every Contract in every chain", function() {
 
   const merkleFactory = await ethers.getContractFactory("MerkleContract");
   const merkleContract 
-  = await merkleFactory.deploy([owner.address,alice.address,mike.address],[2,1,1],0);
+  = await merkleFactory.deploy([bob.address,charlie.address,debbie.address,
+    eva.address],[1,1,1,1],0);
 
-// const merkleContract = merkleFactory.attach('0x03898DAd231A2B9D9eCA58124Ab9e247AFb02bC8');
+// const merkleContract = merkleFactory.attach('');
 
     console.log ('#######################');
     console.log (merkleContract.target);
@@ -95,7 +103,7 @@ describe("Deploying Every Contract in every chain", function() {
                                           alienConfirmation*timeSlotDrex, // this is the time slot in seconds
                                           alienExpiration*timeSlotDrex);  // for alien listrack 
 
-// const alienListrack = factoryAlienListrack.attach('0xC28a8b2e9704D8B5559F2d91b862409e2739c7d4');
+// const alienListrack = factoryAlienListrack.attach('');
                                           
 console.log ('#######################');
 console.log (alienListrack.target);
