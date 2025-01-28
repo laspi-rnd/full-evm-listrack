@@ -30,54 +30,55 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     const equalbalance = (10**15); // 18 is the number of decimals
     
     const drexTokenFactory = await ethers.getContractFactory("DrexToken");
-    const drexToken = drexTokenFactory.attach('0x9840EeC2eb6DA5F07088DA094dD5DCF4CC73094f'); // everyone has Drex Token in Sepolia
+    const drexToken = drexTokenFactory.attach('0xd8BB99269DEE6a0759D047CF8650AAfe62eF8Cb8'); // everyone has Drex Token in Sepolia
   
     console.log ('#######################');
     console.log (drexToken.target);
     console.log ("Owner balance");
     console.log (await (drexToken.balanceOf(owner.address)));
     
-    /*
+    
     for (let i = 0; i < drexSigners.length; i++) {
         await drexToken.connect(owner).transfer(drexSigners[i].address, equalbalance);
         }
-    */
+    
     console.log (await (drexToken.balanceOf(alice.address)));
     console.log (await (drexToken.balanceOf(mike.address)));
 
     /* Setup for alienToken */
     await hre.switchNetwork('alien');
     const alienTokenFactory = await ethers.getContractFactory("AlienToken");
-    const alienToken = alienTokenFactory.attach('0x2F420e432F3bd99D5DB271CB6fcAa27C07aAdA14');
+    const alienToken = alienTokenFactory.attach('0xC8B701Dcf01289E380e3f41bf58E6545175F1a71');
     console.log ('#######################');
     console.log (alienToken.target);
     console.log ("Owner balance");
     console.log (await (alienToken.balanceOf(owner.address)));
-
+    /*
     for (let i = 0; i < alienSigners.length; i++) {
       await alienToken.connect(owner).transfer(alienSigners[i].address, equalbalance);
       }
+    */
     console.log (await (alienToken.balanceOf(alice.address)));
     console.log (await (alienToken.balanceOf(mike.address)));
   
   /* Setup for Merkle Contract */
   await hre.switchNetwork('mainnet');
   const merkleFactory = await ethers.getContractFactory("MerkleContract");
-  const merkleContract = merkleFactory.attach('0x4B83941A5dCdB8d8ca6e8Ef8d3c1EA800FE2Eabc');
+  const merkleContract = merkleFactory.attach('0x4Ca7BE74411B89e4737ef1594Ac47F33C9Ed7175');
   
   console.log ('#######################');
   console.log (merkleContract.target);
   
    /* Setup for Listrack Contract */  
   const factoryListrack = await ethers.getContractFactory("DrexListrack");
-  const Listrack = factoryListrack.attach('0xE3F6d2F9e0d7C982b9B2A628f47C1F36b1d80FCb');
+  const Listrack = factoryListrack.attach('0xe58Cca984405667f9C846D59A1C40f4f2B7382FC');
   console.log ('#######################');
   console.log (Listrack.target);
   
   await hre.switchNetwork('alien');
   /* Setup for AlienListrack Contract */
   const factoryAlienListrack = await ethers.getContractFactory("AlienListrack");
-  const alienListrack = factoryAlienListrack.attach('0x0446f3b15f9A3b942a29B7836A12dd71b7594031');                                     
+  const alienListrack = factoryAlienListrack.attach('0x438Cd3441F263F9ea02Da225EB48FaD84757a57C');                                     
   console.log ('#######################');
   console.log (alienListrack.target);
   
@@ -94,13 +95,13 @@ it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
     await hre.switchNetwork('alien');
       // Approve Alien Listrack to spend AlienToken
       for (let i = 0; i < alienSigners.length; i++) {
-      const _tx = await (alienToken.connect(alienSigners[i]).
+      await (alienToken.connect(alienSigners[i]).
                   approve(alienListrack.target, equalbalance));
                   console.log ("approval emitted");
-        const _txReceipt = await _tx.wait();
-        console.log(_txReceipt.logs)
+     //   const _txReceipt = await _tx.wait();
+     //   console.log(_txReceipt.logs)
      // console.log(_txReceipt);
-      console.log (await (alienToken.allowance(alienSigners[i].address,alienListrack.target)));
+     // console.log (await (alienToken.allowance(alienSigners[i].address,alienListrack.target)));
       } 
 
 await hre.switchNetwork('mainnet');
@@ -115,12 +116,12 @@ for (let i = 0; i < drexSigners.length-1; i++) {
     [drexSigners[i].address,
     drexSigners[i+1].address,
     drexToken.target],
-    500000000000000,
+    100000000000000,
     [merkleContract.target],
     [alienSigners[i].address,
     alienSigners[i+1].address,
     alienToken.target],
-    500000000000000,
+    150000000000000,
     '0x0000000000000000000000000000000000000000000000000000000000000000');
   }
 
@@ -138,50 +139,55 @@ for (let i = 0; i < drexSigners.length-1; i++) {
     // array to store trades to be sent to Alien Chain
   tradesToPushAlien = [];
 
-    for (let i = 0; i < drexSigners.length; i++) {
-      for (let j = 0; j < tradesId[i].length; j++) {
-        // procedure to store tx details in tradesToPushAlien
-        // to set tx in Alien Chain
-      const temp = await Listrack.
-      connect(drexSigners[i]).getDrexAlienInputsbyId(tradesId[i][j]);
-      const _drexHashFields = temp[0][3];
-      const _alienAliceAddress = temp[0][4];
-      const _alienMikeAddress = temp[0][5];
-      const _alienTokencontract = temp[0][6];
-      const _alienAmount = temp[0][8];
-      const _hashedSecret = temp[0][9];
-      const _drexPreviousId = temp[0][11][4];
-      const _drexTxIndex = temp[0][11][3];
-      const _drexTxId = tradesId[i][j];
-      const _drexAlienConfirmationIndex = temp[1];
-     
-      tradesToPushAlien.push([_drexHashFields,_alienAliceAddress,
-        _alienMikeAddress,_alienTokencontract,_alienAmount,
-        _hashedSecret,_drexPreviousId,_drexTxIndex,_drexTxId,_drexAlienConfirmationIndex]);};
-      }
-
-    console.log ("** Trades to be Settled in Alien Chain **");
-    console.log ("** Trades to be Settled in Alien Chain **");
-
-    await hre.switchNetwork('alien');
-
-   txIdsAlienPushed = [];
-
-   console.log ("Trades to Push Alien");
-   console.log(tradesToPushAlien);
-
-    for (let i=0; i<alienSigners.length-1; i++) {
-     await alienListrack.connect(alienSigners[i]).
-      writeAlienLeg(tradesToPushAlien[i*2][0],tradesToPushAlien[i*2][1],
-      tradesToPushAlien[i*2][2],tradesToPushAlien[i*2][3],
-      tradesToPushAlien[i*2][4],tradesToPushAlien[i*2][5],
-      tradesToPushAlien[i*2][6],tradesToPushAlien[i*2][7],
-      tradesToPushAlien[i*2][8]);
-      txIdsAlienPushed.push(tradesToPushAlien[i*2][8]);
+  for (let i = 0; i < drexSigners.length; i++) {
+    for (let j = 0; j < tradesId[i].length; j++) {
+      // procedure to store tx details in tradesToPushAlien
+      // to set tx in Alien Chain
+    const temp = await Listrack.
+    connect(drexSigners[i]).getDrexAlienInputsbyId(tradesId[i][j]);
+    const _drexHashFields = temp[0][3];
+    const _alienAliceAddress = temp[0][4];
+    const _alienMikeAddress = temp[0][5];
+    const _alienTokencontract = temp[0][6];
+    const _alienAmount = temp[0][8];
+    const _hashedSecret = temp[0][9];
+    const _drexPreviousId = temp[0][11][4];
+    const _drexTxIndex = temp[0][11][3];
+    const _drexTxId = tradesId[i][j];
+    const _drexAlienConfirmationIndex = temp[1];
+   
+    tradesToPushAlien.push([_drexHashFields,_alienAliceAddress,
+      _alienMikeAddress,_alienTokencontract,_alienAmount,
+      _hashedSecret,_drexPreviousId,_drexTxIndex,_drexTxId,_drexAlienConfirmationIndex]);};
     }
 
+// console.log (tradesToPushAlien);
+ // the below array store the txs that were settled in Alien Chain
+ txIdsAlienPushed = [];
+  
+  for (let i=0; i<tradesToPushAlien.length; i++) {
+    for (let j=0; j<drexSigners.length ; j++) {
+        // confirms if txId is pushed by Alice
+      //  console.log (alienSigners[j].address);
+    if (alienSigners[j].address == tradesToPushAlien[i][1]) {
+        // confirms if txId is not already pushed
+    if (txIdsAlienPushed.indexOf(tradesToPushAlien[i][8])==-1) {
+   await alienListrack.connect(alienSigners[j]).
+    writeAlienLeg(tradesToPushAlien[i][0],
+    tradesToPushAlien[i][1], // alice Alien Address
+    tradesToPushAlien[i][2],tradesToPushAlien[i][3],
+    tradesToPushAlien[i][4],tradesToPushAlien[i][5],
+    tradesToPushAlien[i][6],tradesToPushAlien[i][7],
+    tradesToPushAlien[i][8]);
+    txIdsAlienPushed.push(tradesToPushAlien[i][8]);
+    }
+    }
+    }
+  }
+
 console.log ("** Trades Settled in Alien Chain **");
 console.log ("** Trades Settled in Alien Chain **");
+console.log (txIdsAlienPushed);
 
 // the array below is to store the alien features of the Tx Id settled in Alien Chain
 TxValidation = [];
@@ -192,9 +198,13 @@ const alfredAlien = alienSigners[0];
 // array with slots to be searched
   slotNumber = [];
 
-  for (let i=0; i<txIdsAlienPushed.length; i++) {
+  for (let i=txIdsAlienPushed.length-1; i<txIdsAlienPushed.length; i++) {
+    console.log (txIdsAlienPushed[i]);
+    console.log (await alienListrack.connect(alfredAlien)
+                          .getTradeFeatures(txIdsAlienPushed[i]));
     const alienFeatures = await alienListrack.connect(alfredAlien)
                           .getTradeFeatures(txIdsAlienPushed[i]);
+    console.log (typeof alienFeatures);
     const merkleProof = await alienListrack.connect(alfredAlien).
                           createMerkleTree(alienFeatures[0],true,alienFeatures[1]);
     TxValidation[i] = [txIdsAlienPushed[i],alienFeatures[1],merkleProof,alienFeatures[0]];
