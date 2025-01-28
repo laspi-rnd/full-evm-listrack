@@ -36,15 +36,13 @@ describe("Deploying Every Contract in every chain", function() {
 
   console.log ('#######################');
   console.log (drexToken.target);
-  console.log (await (drexToken.balanceOf(owner.address)));
+  //console.log (await (drexToken.balanceOf(owner.address)));
   
   // the below code is the first token transfer to users
-  /*
+  
   for (let i = 0; i < drexSigners.length; i++) {
   await drexToken.connect(owner).transfer(drexSigners[i].address, equalbalance);
-  expect(await drexToken.balanceOf(drexSigners[i].address)).to.equal(equalbalance);
   }
-  */
 
   /* Setup for alienToken */
 

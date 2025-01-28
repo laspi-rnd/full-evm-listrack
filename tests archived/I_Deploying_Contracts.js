@@ -32,7 +32,7 @@ describe("Deploying Every Contract in every chain", function() {
   
   const drexTokenFactory = await ethers.getContractFactory("DrexToken");
   const drexToken = await drexTokenFactory.connect(owner).deploy();
-  //const drexToken = drexTokenFactory.attach('0xd8BB99269DEE6a0759D047CF8650AAfe62eF8Cb8'); // everyone has Drex Token in Sepolia
+  //const drexToken = drexTokenFactory.attach('0x9840EeC2eb6DA5F07088DA094dD5DCF4CC73094f'); // everyone has Drex Token in Sepolia
 
   console.log ('#######################');
   console.log (drexToken.target);
@@ -42,7 +42,6 @@ describe("Deploying Every Contract in every chain", function() {
   
   for (let i = 0; i < drexSigners.length; i++) {
   await drexToken.connect(owner).transfer(drexSigners[i].address, equalbalance);
-  //expect(await drexToken.balanceOf(drexSigners[i].address)).to.equal(equalbalance);
   }
 
   /* Setup for alienToken */
@@ -88,6 +87,8 @@ const Listrack = await factoryListrack.deploy(timeSlotDrex,drexLeg,
 console.log ('#######################');
 console.log (Listrack.target);
 
+
+      
 await hre.switchNetwork('alien');
 /* Setup for AlienListrack Contract */
 const factoryAlienListrack = await ethers.getContractFactory("AlienListrack");
