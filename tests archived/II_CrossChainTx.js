@@ -3,10 +3,9 @@ const { ethers } = require("hardhat");
 const { provider } = ethers.getDefaultProvider();
 
 const timeSlotDrex = 20; // in seconds
-const drexLeg = 2; // in time slot
+const drexLeg = 6; // in time slot
 const alienConfirmation = 3*drexLeg; // in time slot
 const alienExpiration = 2*alienConfirmation; // in time slot
-
 
 //import {hre} from "hardhat/types"
 const {loadFixture} = require("@nomicfoundation/hardhat-toolbox/network-helpers");
@@ -15,7 +14,10 @@ const {time} = require("@nomicfoundation/hardhat-network-helpers");
 
 describe("Cross-Chain Transfers Between EVMs", function() {
 
-async function InitialSetupFixture() {
+
+it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
+    Merkle Root by Merkle Contract | Alice settles Tx in Drex",
+        async function() {
 
     await hre.switchNetwork('mainnet');
 
@@ -28,43 +30,59 @@ async function InitialSetupFixture() {
     const equalbalance = (10**15); // 18 is the number of decimals
     
     const drexTokenFactory = await ethers.getContractFactory("DrexToken");
-    const drexToken = drexTokenFactory.attach('0x7CfdA9c2aE901bA78897594070Db4Dbe264023ba'); // everyone has Drex Token in Sepolia
+    const drexToken = drexTokenFactory.attach('0x9840EeC2eb6DA5F07088DA094dD5DCF4CC73094f'); // everyone has Drex Token in Sepolia
   
     console.log ('#######################');
     console.log (drexToken.target);
+    console.log ("Owner balance");
     console.log (await (drexToken.balanceOf(owner.address)));
-  
+    
+    /*
+    for (let i = 0; i < drexSigners.length; i++) {
+        await drexToken.connect(owner).transfer(drexSigners[i].address, equalbalance);
+        }
+    */
+    console.log (await (drexToken.balanceOf(alice.address)));
+    console.log (await (drexToken.balanceOf(mike.address)));
+
     /* Setup for alienToken */
     await hre.switchNetwork('alien');
     const alienTokenFactory = await ethers.getContractFactory("AlienToken");
-    const alienToken = alienTokenFactory.attach('0x679549671a648E73c8Ef13D1151f5bd3C8f7C593');
+    const alienToken = alienTokenFactory.attach('0x2F420e432F3bd99D5DB271CB6fcAa27C07aAdA14');
     console.log ('#######################');
     console.log (alienToken.target);
+    console.log ("Owner balance");
+    console.log (await (alienToken.balanceOf(owner.address)));
+
+    for (let i = 0; i < alienSigners.length; i++) {
+      await alienToken.connect(owner).transfer(alienSigners[i].address, equalbalance);
+      }
+    console.log (await (alienToken.balanceOf(alice.address)));
+    console.log (await (alienToken.balanceOf(mike.address)));
   
   /* Setup for Merkle Contract */
   await hre.switchNetwork('mainnet');
-  
   const merkleFactory = await ethers.getContractFactory("MerkleContract");
-  const merkleContract = merkleFactory.attach('0x4aBa1396ead9E7d15f95E62fF6f3D1C5301cd283');
+  const merkleContract = merkleFactory.attach('0x4B83941A5dCdB8d8ca6e8Ef8d3c1EA800FE2Eabc');
   
   console.log ('#######################');
   console.log (merkleContract.target);
   
    /* Setup for Listrack Contract */  
   const factoryListrack = await ethers.getContractFactory("DrexListrack");
-  const Listrack = factoryListrack.attach('0xEfe67A371D784b32EB5eD6A93e187Ab233664908');
+  const Listrack = factoryListrack.attach('0xE3F6d2F9e0d7C982b9B2A628f47C1F36b1d80FCb');
   console.log ('#######################');
   console.log (Listrack.target);
   
   await hre.switchNetwork('alien');
   /* Setup for AlienListrack Contract */
   const factoryAlienListrack = await ethers.getContractFactory("AlienListrack");
-  const alienListrack = factoryAlienListrack.attach('0x7CfdA9c2aE901bA78897594070Db4Dbe264023ba');                                     
+  const alienListrack = factoryAlienListrack.attach('0x0446f3b15f9A3b942a29B7836A12dd71b7594031');                                     
   console.log ('#######################');
   console.log (alienListrack.target);
   
   
-  hre.switchNetwork('mainnet');
+  await hre.switchNetwork('mainnet');
   // Approve Listrack to spend DrexToken
       for (let i = 0; i < drexSigners.length; i++) {
       await (drexToken.connect(drexSigners[i]).
@@ -73,66 +91,27 @@ async function InitialSetupFixture() {
       console.log (await (drexToken.allowance(drexSigners[i].address,Listrack.target)));
       }
   
-      await hre.switchNetwork('alien');
+    await hre.switchNetwork('alien');
       // Approve Alien Listrack to spend AlienToken
       for (let i = 0; i < alienSigners.length; i++) {
-      console.log (alienSigners[i].address);
-      await (alienToken.connect(alienSigners[i]).
+      const _tx = await (alienToken.connect(alienSigners[i]).
                   approve(alienListrack.target, equalbalance));
-     // console.log(_txReceipt.logs[0].args[2]);
+                  console.log ("approval emitted");
+        const _txReceipt = await _tx.wait();
+        console.log(_txReceipt.logs)
      // console.log(_txReceipt);
       console.log (await (alienToken.allowance(alienSigners[i].address,alienListrack.target)));
       } 
-  
-  return {drexSigners,alienSigners,merkleSigners,
-    drexToken,alienToken,merkleContract,Listrack,alienListrack,
-        equalbalance};
 
-  }
-
-it("Alice must set the Tx in Drex without errors and Mike should lock Funds",
-    async function () {
-    
-    const {drexSigners,alienSigners,merkleSigners,
-    drexToken,alienToken,merkleContract,Listrack,alienListrack,
-    equalbalance} 
-    = await loadFixture (InitialSetupFixture);
-
-    for (let i = 0; i < drexSigners.length-1; i++) {
-        const _txIdObject = await Listrack.connect(drexSigners[i]).setTrade(
-          [drexSigners[i].address,
-          drexSigners[i+1].address,
-          drexToken.target],
-          100000000000000,
-          [merkleContract.target],
-          [alienSigners[i].address,
-          alienSigners[i+1].address,
-          alienToken.target],
-          100000000000000,
-          '0x0000000000000000000000000000000000000000000000000000000000000000');
-            
-          const _txReceipt = await _txIdObject.wait();
-          _txId = _txReceipt.logs[0].args[2];
-          //console.log (_txReceipt.logs[0].args[2]);
-
-         
-            // Mike Agree Trade below
-         await (Listrack.connect(drexSigners[i+1]).mikeAgreeTrade(_txId));
-        }
-});
-
-it("Mike sends Drex Tx | Alice confirms Tx in Alien Chain | \
-Merkle Root by Merkle Contract | Alice settles Tx in Drex",
-    async function() {
-    
-        const {drexSigners,alienSigners,merkleSigners,
-            drexToken,alienToken,merkleContract,Listrack,alienListrack,
-            equalbalance} 
-            = await loadFixture (InitialSetupFixture);
-
+await hre.switchNetwork('mainnet');
+console.log ("** Transactions TO BE Locked by Mike in Drex **");
+console.log ("** Transactions TO BE Locked by Mike in Drex **");
+console.log ("** Transactions TO BE Locked by Mike in Drex **");
 // Mike sends Tx in Drex
 for (let i = 0; i < drexSigners.length-1; i++) {
-    expect (await Listrack.connect(drexSigners[i+1]).setTrade(
+    console.log (drexSigners[i].address);
+    console.log (drexSigners[i+1].address);
+    await Listrack.connect(drexSigners[i+1]).setTrade(
     [drexSigners[i].address,
     drexSigners[i+1].address,
     drexToken.target],
@@ -142,7 +121,7 @@ for (let i = 0; i < drexSigners.length-1; i++) {
     alienSigners[i+1].address,
     alienToken.target],
     500000000000000,
-    '0x0000000000000000000000000000000000000000000000000000000000000000'));
+    '0x0000000000000000000000000000000000000000000000000000000000000000');
   }
 
   console.log ("** Transactions Locked by Mike in Drex **");
@@ -181,7 +160,15 @@ for (let i = 0; i < drexSigners.length-1; i++) {
         _hashedSecret,_drexPreviousId,_drexTxIndex,_drexTxId,_drexAlienConfirmationIndex]);};
       }
 
+    console.log ("** Trades to be Settled in Alien Chain **");
+    console.log ("** Trades to be Settled in Alien Chain **");
+
+    await hre.switchNetwork('alien');
+
    txIdsAlienPushed = [];
+
+   console.log ("Trades to Push Alien");
+   console.log(tradesToPushAlien);
 
     for (let i=0; i<alienSigners.length-1; i++) {
      await alienListrack.connect(alienSigners[i]).
@@ -189,7 +176,7 @@ for (let i = 0; i < drexSigners.length-1; i++) {
       tradesToPushAlien[i*2][2],tradesToPushAlien[i*2][3],
       tradesToPushAlien[i*2][4],tradesToPushAlien[i*2][5],
       tradesToPushAlien[i*2][6],tradesToPushAlien[i*2][7],
-      tradesToPushAlien[i*2][8],tradesToPushAlien[i*2][9]);
+      tradesToPushAlien[i*2][8]);
       txIdsAlienPushed.push(tradesToPushAlien[i*2][8]);
     }
 
@@ -236,9 +223,11 @@ const alfredAlien = alienSigners[0];
 
   const slotToVerify = slotNumber[j];
   //console.log (latestSlot);
+  await hre.switchNetwork('alien');
   merkleRoot = await (alienListrack.connect(merkleSigners[i]).createMerkleTree(slotToVerify,false,0));
   // console.log(merkleRoot);
   // merkleRoot[0] is the Merkle Root returned by Function in a array object
+  await hre.switchNetwork('mainnet');
   await (merkleContract.connect(merkleSigners[i]).insertMerkleForApproval(merkleRoot[0],slotToVerify));
   }
   }
@@ -250,6 +239,8 @@ const alfredAlien = alienSigners[0];
   /// MERKLE CONTRACT REACHED CONSENSUS ON ALIEN CHAIN
   
    /// SENDING TRANSACTIONS FOR SETTLEMENT IN DREX LISTRACK BY ALICE
+
+   await hre.switchNetwork('mainnet');
 
    for (let i=0; i<TxValidation.length; i++) {
     merkleProof = Object.values(TxValidation[i][2]);

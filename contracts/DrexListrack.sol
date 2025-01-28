@@ -540,10 +540,14 @@ pragma solidity ^0.8.24;
         require (keccak256(abi.encodePacked(_secretRevealed)) == trade.hashedSecret,
          "Secret Hashed is not equal to Hashed Secret of the Transaction");
           // verifying if transaction is not expired yet for Alien Leg Expiration using 70% of time
-          /*
+        
+        console.log ("Current Slot :",slotProduction.currentSlot);
+        console.log ("Tx Slot :", trades[_txId].statusChain.slotNumber);
+        console.log ("HTLC Expiration :",  (((listrackExpiration*7000))/10000));
+
         require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
-                < (((alienConfirmation*7000))/10000) ,"Alien Leg already expired");
-        */
+                < (((listrackExpiration*7000))/10000) ,"Alien Leg already expired");
+        
         }
         
         // transfer Mike Drex to Alice Drex Address
