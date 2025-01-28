@@ -95,6 +95,7 @@ pragma solidity ^0.8.24;
         uint256 currentSlot;
         uint256 genesisSlot;
         uint256 lastTimeStamp; 
+        uint256 currentTxIndex;
     }
 
     struct StatusChain {
@@ -361,6 +362,8 @@ pragma solidity ^0.8.24;
             )
         ); 
 
+        updateChain(); //CHANGED
+
         //console.log ("Hashes Ok | _hashFields :");
         //console.logBytes32 (_hashFields);
 
@@ -440,13 +443,16 @@ pragma solidity ^0.8.24;
      //   console.log         ("# Trade Registered :");
      //   console.logBytes32  (_txId);
 
+        // the below code is required for properly updating the chain
+        slotProduction.currentTxIndex = chainDrexTx.length-1;  // CHANGED
+
         // Mike can automatically lock transaction whether he is the sender
         if (msg.sender == _drexAddresses[1]) {
             mikeAgreeTrade (_txId);
             // if Mike does not have enough funds the transaction is not either
             // registered (set) or locked because mikeAgreeTrade has require functions inside
         }   else {
-            updateChain (chainDrexTx.length-1);
+         //   updateChain (chainDrexTx.length-1);   // CHANGED
             }
 
         // Event are only emitted whether every require succeeds in previous statements
@@ -475,6 +481,8 @@ pragma solidity ^0.8.24;
         require(trades[_txId].mikeDrexAddress == msg.sender, "Unauthorized to lock funds");
         require(!trades[_txId].statusChain.locked, "Trade is already locked");
 
+        updateChain();
+
         // verifying if transaction is not expired yet for Drex leg
         require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
                 < drexLegExpiration ,"Drex leg already expired");
@@ -502,7 +510,8 @@ pragma solidity ^0.8.24;
         // the function above allows Merkle Contracts to make automatic operations
         } 
         emit lockedTxId(_txId);
-        updateChain (trades[_txId].statusChain.chainPosition);
+        // updateChain (trades[_txId].statusChain.chainPosition); // CHANGED
+        // slotProduction.currentTxIndex = trades[_txId].statusChain.chainPosition;
         //console.log ("!!!!!!!! LOCKED Transaction Successful : ");
         //console.logBytes32(_txId);
         }
@@ -527,8 +536,18 @@ pragma solidity ^0.8.24;
 
         // verifying Hashed Secret
         if (trade.hashedSecret!=bytes32(0)) {
+        updateChain();
         require (keccak256(abi.encodePacked(_secretRevealed)) == trade.hashedSecret,
          "Secret Hashed is not equal to Hashed Secret of the Transaction");
+          // verifying if transaction is not expired yet for Alien Leg Expiration using 70% of time
+        
+        console.log ("Current Slot :",slotProduction.currentSlot);
+        console.log ("Tx Slot :", trades[_txId].statusChain.slotNumber);
+        console.log ("HTLC Expiration :",  (((listrackExpiration*7000))/10000));
+
+        require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
+                < (((listrackExpiration*7000))/10000) ,"Alien Leg already expired");
+        
         }
         
         // transfer Mike Drex to Alice Drex Address
@@ -635,6 +654,7 @@ pragma solidity ^0.8.24;
         //console.log (">> Tx Slot :", trades[_txId].statusChain.slotNumber);
         //console.log (">> Listrack Expiration :", listrackExpiration);
 
+        updateChain();
         require((slotProduction.currentSlot-trades[_txId].statusChain.slotNumber)
                 >= listrackExpiration ,"Listrack transaction not expired yet");
         
@@ -796,7 +816,7 @@ pragma solidity ^0.8.24;
         slotProduction.lowerLimitDrexIndexAlienConfirmation);
     }
 
-      function updateChain (uint256 _indexId) private {
+      function updateChain () private {
 
         uint256 _ellapsedTime = block.timestamp - slotProduction.lastTimeStamp;
         console.log (">>> Ellapsed Time: ", _ellapsedTime);
@@ -820,7 +840,7 @@ pragma solidity ^0.8.24;
         // initiated this algorithm for reverting transactions and
         // and confirming transactions in Alien Chain through sending that indexId to
         // Alien Chain
-        slotHeadTxIndex[slotProduction.currentSlot] = _indexId;
+        slotHeadTxIndex[slotProduction.currentSlot] = slotProduction.currentTxIndex;
         console.log (">>> New Slot Head Index after New Slot Created : ", (slotHeadTxIndex[slotProduction.currentSlot]));
         //console.log ("New blockHead Tx Id : ");
         //console.logBytes32 (blockHead[block.number].TxId);
