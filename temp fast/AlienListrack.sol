@@ -187,6 +187,8 @@ contract AlienListrack is ReentrancyGuard {
         require (_alientokencontract == tokenAddress,"This is not the alien contract for this token");
         require (!transactions[_drexTxId].isSettled,"transaction already settled");
 
+        updateTimeSlot();
+
         // below code is deprecated because index is not used anymore
         // require (_drexTxIndex >= drexConfirmationIndex,"Alien Transaction is no more valid to Confirm");
         // too late to confirm the transaction
@@ -260,7 +262,7 @@ contract AlienListrack is ReentrancyGuard {
         // ARRUMAR ABAIXO
         bool success = false;
 
-        // anyone can send Mike funds to him again becaus
+        // anyone can send Mike funds to him again because
         // the tx is updated with refunded = true;
         // require (msg.sender == transactions[_txId].mikeAddress, "Only Mike can settle the trade");
 

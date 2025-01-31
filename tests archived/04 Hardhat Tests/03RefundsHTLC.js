@@ -93,7 +93,7 @@ async function InitialSetupFixture() {
   
   /* Setup for AlienListrack Contract */
   const factoryAlienListrack = await ethers.getContractFactory("AlienListrack");
-  const alienListrack = await factoryAlienListrack.deploy(alienToken,
+  const alienListrack = await factoryAlienListrack.deploy(
                                           alienConfirmation*timeSlotDrex, // this is the time slot in seconds
                                           alienExpiration*timeSlotDrex);  // for alien listrack 
    

@@ -108,12 +108,10 @@ contract AlienListrack is ReentrancyGuard {
     SlotStatus public slotProduction;
     // variable to control SlotProduction
 
-    constructor(address _tokenAddress, uint256 _alienLegConfirmation,
+    constructor(uint256 _alienLegConfirmation,
                         uint256 _alienLegRefund) payable {
         // each AlienListrack is for a different alien Token
        // owner = msg.sender; // Set the contract deployer as the owner
-       
-        tokenAddress = _tokenAddress;
 
         timeSlotConfirmation = _alienLegConfirmation; // in seconds
          // in seconds accordingly to Listrack defaults
@@ -184,7 +182,7 @@ contract AlienListrack is ReentrancyGuard {
 
         require (msg.sender==_aliceAlienAddress,"Only Alice can send this Transaction");
         require (_compareHashFields==_drexTxId,"Drex Id Hash is not equal to the inputed parameters");
-        require (_alientokencontract == tokenAddress,"This is not the alien contract for this token");
+        //require (_alientokencontract == tokenAddress,"This is not the alien contract for this token");
         require (!transactions[_drexTxId].isSettled,"transaction already settled");
 
         updateTimeSlot();
