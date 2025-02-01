@@ -292,7 +292,7 @@ for (let i = 0; i < drexSigners.length; i++) {
   
     }
 
-    it("Mike unlock his funds in Alien Listrack",
+    it("Mike unlock his funds in Drex Listrack",
           async function() {
           
               const {drexSigners,alienSigners,merkleSigners,
@@ -305,8 +305,8 @@ for (let i = 0; i < drexSigners.length; i++) {
                   const alfredAlien = alienSigners[0];
                   const bobAlien    = alienSigners[1];
 
-    console.log ("** Starting Mike Unlocking his Funds in Alien Listrack **");
-    console.log ("** Starting Mike Unlocking his Funds in Alien Listrack **");
+    console.log ("** Starting Mike Unlocking his Funds in Drex Listrack **");
+    console.log ("** Starting Mike Unlocking his Funds in Drex Listrack **");
     
    // await time.increase(alienExpiration*timeSlotDrex); //
     // writing a transaction below in Listrack only to make slotTimechange
