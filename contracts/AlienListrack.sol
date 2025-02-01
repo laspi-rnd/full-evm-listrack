@@ -115,7 +115,7 @@ contract AlienListrack is ReentrancyGuard {
 
         timeSlotConfirmation = _alienLegConfirmation; // in seconds
          // in seconds accordingly to Listrack defaults
-         // it is Recommended to be equal to Alien Expiration (Total Time of Both operations)
+         // it is Recommended to be equal to Alien Confirmation (Total Time of Both operations)
 
         alienLegRefund = _alienLegRefund; // in seconds
          // in seconds accordingly to Listrack defaults
